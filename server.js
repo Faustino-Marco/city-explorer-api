@@ -31,7 +31,7 @@ app.get('/weather', (request, response) => {
 // Response for invalid req
 app.get('*', (req, res) => {
   res.status(404).send('These are not the droids you\'re looking for');
-})
+});
 
 //CLASSES
 class Forecast {
@@ -40,14 +40,16 @@ class Forecast {
     this.description = weatherInfo.weather.description;
     console.log(this.dateTime , this.description);
   }
-}
+};
+
 //ERRORS
 app.use((error, req, res, next) => {
   console.log(error.message);
+  response.status(500).send(error.message);
 }); 
 
 //LISTEN
-app.listen(PORT, () => console.log(`listening on port FUCK YEAH !!!! ${PORT}`));
+app.listen(PORT, () => console.log(`listening on port ${PORT}`));
 
 
 
