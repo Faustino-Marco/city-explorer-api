@@ -21,10 +21,18 @@ app.get('/', (req, res) => {
   res.status(200).send('Hello there!');
 });
 
-app.get('/weather', (request, response) => {
-  let dataFromWeatherAPI = weatherData.find(obj => obj.city_name.toLowerCase() === request.query.searchQuery.toLowerCase());
-  let retrievedForecastData = dataFromWeatherAPI.data.map(day => new Forecast(day));
+app.get('/weather', async (request, response) => {
+  let searchLat = request.query.lat;
+  let searchLon = request.query.lon;
+  // let url2 = `https://api.weatherbit.io/v2.0/current?${cityInfo.data[0].lat}&${cityInfo.data[0].lon}&key=${process.env.WEATHER_BIT_IO_API_KEY}&include=minutely`
+  let url = `http://api.weatherbit.io/v2.0/forecast/daily?lat=${searchLat}&lon=${searchLon}&key=${process.env.WEATHER_BIT_IO_API_KEY}&days=5&units=I&lang=en`
+  let dataFromWeatherAPI = await axios.get(url);
+  console.log(dataFromWeatherAPI.data);
+
+  let retrievedForecastData = dataFromWeatherAPI.data.data.map(day => new Forecast(day));
+
   console.log(retrievedForecastData);
+
   response.status(200).send(retrievedForecastData);
 });
 
