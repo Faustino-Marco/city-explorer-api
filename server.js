@@ -22,11 +22,26 @@ app.get('/', (req, res) => {
 });
 
 app.get('/weather', (request, response) => {
-  let dataFromWeatherAPI = weatherData.find(obj => obj.city_name.toLowerCase()===request.query.searchQuery.toLowerCase());
+  let dataFromWeatherAPI = weatherData.find(obj => obj.city_name.toLowerCase() === request.query.searchQuery.toLowerCase());
   let retrievedForecastData = dataFromWeatherAPI.data.map(day => new Forecast(day));
   console.log(retrievedForecastData);
   response.status(200).send(retrievedForecastData);
 });
+
+app.get('/movies', async (request, response) => {
+  try {
+    let searchQuery = request.query.searchQuery
+    let url = `
+    https://api.themoviedb.org/3/search/movie?api_key=${process.env.THE_MOVIE_DB_API_KEY_V3}&quer${searchQuery}`
+    let dataFromMoviesAPI = await axios.get(url);
+    let retrievedMovieData = dataFromMoviesAPI.data.results.map(movie => new Movie);
+    console.log(dataFromMoviesAPI);
+    // console.log(retrievedMovieData);
+    // response(200).send(retrievedMovieData);
+  } catch (error) {
+    console.log(error.message);
+  }
+  });
 
 // Response for invalid req
 app.get('*', (req, res) => {
@@ -35,18 +50,27 @@ app.get('*', (req, res) => {
 
 //CLASSES
 class Forecast {
-  constructor(weatherInfo){
+  constructor(weatherInfo) {
     this.dateTime = weatherInfo.datetime;
     this.description = weatherInfo.weather.description;
-    console.log(this.dateTime , this.description);
+    console.log(this.dateTime, this.description);
   }
 };
+
+class Movies {
+  constructor(movieData) {
+    this.title = movieData.title;
+    this.description = movieData.overview;
+    // https://image.tmdb.org/t/p/w300/poster_path
+    this.src = movieObj.poster_path ? movieData.poster_path : 'myImg.jpg'
+  }
+}
 
 //ERRORS
 app.use((error, req, res, next) => {
   console.log(error.message);
   response.status(500).send(error.message);
-}); 
+});
 
 //LISTEN
 app.listen(PORT, () => console.log(`listening on port ${PORT}`));
