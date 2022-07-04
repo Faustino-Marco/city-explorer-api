@@ -1,8 +1,7 @@
 'use strict';
-
 //REQUIRE
 const express = require('express');
-const weatherData = require('./data/weather.json')
+const weatherData = require('./data/weather.json');
 const cors = require('cors');
 const axios = require('axios');
 const { response } = require('express');
@@ -24,10 +23,9 @@ app.get('/', (req, res) => {
 app.get('/weather', async (request, response) => {
   let searchLat = request.query.lat;
   let searchLon = request.query.lon;
-  // let url2 = `https://api.weatherbit.io/v2.0/current?${cityInfo.data[0].lat}&${cityInfo.data[0].lon}&key=${process.env.WEATHER_BIT_IO_API_KEY}&include=minutely`
   let url = `http://api.weatherbit.io/v2.0/forecast/daily?lat=${searchLat}&lon=${searchLon}&key=${process.env.WEATHER_BIT_IO_API_KEY}&days=5&units=I&lang=en`
   let dataFromWeatherAPI = await axios.get(url);
-  console.log(dataFromWeatherAPI.data);
+  // console.log(dataFromWeatherAPI.data);
 
   let retrievedForecastData = dataFromWeatherAPI.data.data.map(day => new Forecast(day));
 
@@ -38,16 +36,22 @@ app.get('/weather', async (request, response) => {
 
 app.get('/movies', async (request, response) => {
   try {
-    let searchQuery = request.query.searchQuery
-    let url = `
-    https://api.themoviedb.org/3/search/movie?api_key=${process.env.THE_MOVIE_DB_API_KEY_V3}&quer${searchQuery}`
+    let searchCity = request.query.city
+    console.log('Seattle');
+    console.log(searchCity);
+    let url = 
+    `https://api.themoviedb.org/3/search/movie?api_key=${process.env.MOVIE_API_KEY}&query=${searchCity}`;
     let dataFromMoviesAPI = await axios.get(url);
-    let retrievedMovieData = dataFromMoviesAPI.data.results.map(movie => new Movie);
-    console.log(dataFromMoviesAPI);
-    // console.log(retrievedMovieData);
-    // response(200).send(retrievedMovieData);
+    let retrievedMovieData = dataFromMoviesAPI.data.results.map(movie => new Movie(movie));
+
+    // console.log(dataFromMoviesAPI.data);
+    console.log(retrievedMovieData);
+    // response.status(200).send(dataFromMoviesAPI.data);
+    response.status(200).send(retrievedMovieData);
+
   } catch (error) {
     console.log(error.message);
+    response.status(500).send(error.message);
   }
   });
 
@@ -61,18 +65,22 @@ class Forecast {
   constructor(weatherInfo) {
     this.dateTime = weatherInfo.datetime;
     this.description = weatherInfo.weather.description;
-    console.log(this.dateTime, this.description);
+    // console.log(this.dateTime, this.description);
   }
 };
 
-class Movies {
+class Movie {
   constructor(movieData) {
     this.title = movieData.title;
     this.description = movieData.overview;
+    this.average_votes = movieData.vote_average;
+    this.total_votes = movieData.vote_count;
     // https://image.tmdb.org/t/p/w300/poster_path
-    this.src = movieObj.poster_path ? movieData.poster_path : 'myImg.jpg'
+    this.src = movieData.poster_path ? `https://image.tmdb.org/t/p/w300/${movieData.poster_path}` : '#';
+    this.popularity = movieData.popularity
+    this.released_on = movieData.release_date
   }
-}
+};
 
 //ERRORS
 app.use((error, req, res, next) => {
