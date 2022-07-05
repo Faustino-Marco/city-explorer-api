@@ -8,8 +8,8 @@ const { response } = require('express');
 const dotenv = require('dotenv').config();
 
 //REQUIRE MODULES
-const getMovies = require('./modules/movies.js');
-
+const getMovies = require('./modules/movies');
+const getWeather = require('./modules/weather');
 //USE
 const app = express();
 app.use(cors());
@@ -25,24 +25,12 @@ app.get('/', (req, res) => {
 
 app.get('/weather', getWeather);
 
-
 app.get('/movies', getMovies);
-
-
 
 // Response for invalid req
 app.get('*', (req, res) => {
   res.status(404).send('These are not the droids you\'re looking for');
 });
-
-//CLASSES
-class Forecast {
-  constructor(weatherInfo) {
-    this.dateTime = weatherInfo.datetime;
-    this.description = weatherInfo.weather.description;
-    // console.log(this.dateTime, this.description);
-  }
-};
 
 //ERRORS
 app.use((error, req, res, next) => {

@@ -2,7 +2,7 @@
 
 const axios = require('axios');
 
-async function getWeather(request, response, next) => {
+async function getWeather(request, response) {
   let searchLat = request.query.lat;
   let searchLon = request.query.lon;
   let url = `http://api.weatherbit.io/v2.0/forecast/daily?lat=${searchLat}&lon=${searchLon}&key=${process.env.WEATHER_BIT_IO_API_KEY}&days=5&units=I&lang=en`
