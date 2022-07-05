@@ -7,6 +7,9 @@ const axios = require('axios');
 const { response } = require('express');
 const dotenv = require('dotenv').config();
 
+//REQUIRE MODULES
+const getMovies = require('./modules/movies');
+const getWeather = require('./modules/weather');
 //USE
 const app = express();
 app.use(cors());
@@ -20,67 +23,14 @@ app.get('/', (req, res) => {
   res.status(200).send('Hello there!');
 });
 
-app.get('/weather', async (request, response) => {
-  let searchLat = request.query.lat;
-  let searchLon = request.query.lon;
-  let url = `http://api.weatherbit.io/v2.0/forecast/daily?lat=${searchLat}&lon=${searchLon}&key=${process.env.WEATHER_BIT_IO_API_KEY}&days=5&units=I&lang=en`
-  let dataFromWeatherAPI = await axios.get(url);
-  // console.log(dataFromWeatherAPI.data);
+app.get('/weather', getWeather);
 
-  let retrievedForecastData = dataFromWeatherAPI.data.data.map(day => new Forecast(day));
-
-  console.log(retrievedForecastData);
-
-  response.status(200).send(retrievedForecastData);
-});
-
-app.get('/movies', async (request, response) => {
-  try {
-    let searchCity = request.query.city
-    console.log('Seattle');
-    console.log(searchCity);
-    let url = 
-    `https://api.themoviedb.org/3/search/movie?api_key=${process.env.MOVIE_API_KEY}&query=${searchCity}`;
-    let dataFromMoviesAPI = await axios.get(url);
-    let retrievedMovieData = dataFromMoviesAPI.data.results.map(movie => new Movie(movie));
-
-    // console.log(dataFromMoviesAPI.data);
-    console.log(retrievedMovieData);
-    // response.status(200).send(dataFromMoviesAPI.data);
-    response.status(200).send(retrievedMovieData);
-
-  } catch (error) {
-    console.log(error.message);
-    response.status(500).send(error.message);
-  }
-  });
+app.get('/movies', getMovies);
 
 // Response for invalid req
 app.get('*', (req, res) => {
   res.status(404).send('These are not the droids you\'re looking for');
 });
-
-//CLASSES
-class Forecast {
-  constructor(weatherInfo) {
-    this.dateTime = weatherInfo.datetime;
-    this.description = weatherInfo.weather.description;
-    // console.log(this.dateTime, this.description);
-  }
-};
-
-class Movie {
-  constructor(movieData) {
-    this.title = movieData.title;
-    this.description = movieData.overview;
-    this.average_votes = movieData.vote_average;
-    this.total_votes = movieData.vote_count;
-    // https://image.tmdb.org/t/p/w300/poster_path
-    this.src = movieData.poster_path ? `https://image.tmdb.org/t/p/w300/${movieData.poster_path}` : '#';
-    this.popularity = movieData.popularity
-    this.released_on = movieData.release_date
-  }
-};
 
 //ERRORS
 app.use((error, req, res, next) => {
