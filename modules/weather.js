@@ -9,7 +9,7 @@ async function getWeather(request, response) {
   let key = 'weather-' + searchLat + searchLon;
   let url = `http://api.weatherbit.io/v2.0/forecast/daily?lat=${searchLat}&lon=${searchLon}&key=${process.env.WEATHER_BIT_IO_API_KEY}&days=5&units=I&lang=en`
 
-  if (cache[key] && (Date.now() - chace[key].timestamp < 50000)) {
+  if (cache[key] && (Date.now() - cache[key].timestamp < 50000)) {
     console.log('cache hit');
   } else {
     let dataFromWeatherAPI = await axios.get(url);
